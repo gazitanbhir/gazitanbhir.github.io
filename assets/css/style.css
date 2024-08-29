@@ -1940,9 +1940,3 @@ textarea.form-input::-webkit-resizer { display: none; }
   text-decoration: none;
   cursor: pointer;
 }
-
-.lazy {
-  width: 100%; /* Ensure images fit their container */
-  height: auto;
-  display: block; /* Ensure images are displayed */
-}

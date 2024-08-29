@@ -192,67 +192,48 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
-
 document.addEventListener("DOMContentLoaded", function() {
-  let lazyImages = [].slice.call(document.querySelectorAll("img.lazy"));
-  let loading = false;
+  const lazyImages = [].slice.call(document.querySelectorAll("img.lazy"));
+  const placeholder = './assets/images/ph.jpg'; // Path to your placeholder image
 
-  // Placeholder image URL
-  const placeholder = 'assets/images/ph.jpg';
-
-  function loadImages() {
-    if (loading) return;
-    loading = true;
-
-    // Process images one by one
-    const image = lazyImages.shift();
-    if (image) {
-      // Set the placeholder image
-      image.src = placeholder;
-
-      // Load the actual image
-      const actualImage = new Image();
-      actualImage.src = image.dataset.src;
-      actualImage.onload = () => {
-        image.src = actualImage.src; // Set the actual image src
-        image.classList.remove("lazy");
-        loading = false; // Reset loading state after image is loaded
-        loadImages(); // Load next image
-      };
-      actualImage.onerror = () => {
-        // Handle image load errors
-        loading = false;
-        loadImages(); // Continue to next image
-      };
-    }
-  }
-
-  // Create an Intersection Observer to observe when the images come into view
   if ("IntersectionObserver" in window) {
-    let lazyImageObserver = new IntersectionObserver(function(entries) {
+    // Create an Intersection Observer to handle lazy loading
+    const lazyImageObserver = new IntersectionObserver(function(entries, observer) {
       entries.forEach(function(entry) {
         if (entry.isIntersecting) {
-          loadImages(); // Start loading images as they enter the viewport
-          lazyImageObserver.unobserve(entry.target); // Stop observing this image
+          const lazyImage = entry.target;
+          lazyImage.src = lazyImage.dataset.src; // Set the actual image src
+          lazyImage.classList.remove("lazy"); // Remove the lazy class
+          lazyImage.onerror = () => {
+            // Handle image load errors
+            console.error(`Failed to load image: ${lazyImage.dataset.src}`);
+          };
+          lazyImageObserver.unobserve(lazyImage); // Stop observing this image
         }
       });
     });
 
+    // Add each lazy image to the observer
     lazyImages.forEach(function(lazyImage) {
-      lazyImageObserver.observe(lazyImage);
+      lazyImage.src = placeholder; // Set placeholder image initially
+      lazyImageObserver.observe(lazyImage); // Start observing
     });
   } else {
     // Fallback for older browsers
     lazyImages.forEach(function(lazyImage) {
-      // Set the placeholder image initially
-      lazyImage.src = placeholder;
-      lazyImage.onload = () => {
-        lazyImage.src = lazyImage.dataset.src;
+      lazyImage.src = placeholder; // Set placeholder image initially
+      // Immediately load all images
+      const actualImage = new Image();
+      actualImage.src = lazyImage.dataset.src;
+      actualImage.onload = () => {
+        lazyImage.src = actualImage.src;
         lazyImage.classList.remove("lazy");
+      };
+      actualImage.onerror = () => {
+        console.error(`Failed to load image: ${actualImage.src}`);
       };
     });
   }
 });
-
 
 

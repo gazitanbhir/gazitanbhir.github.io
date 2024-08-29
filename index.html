@@ -23,6 +23,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    .lazy {
+      width: 100%; /* Ensure images fit their container */
+      height: auto;
+      display: block; /* Ensure images are displayed */
+    }
+  </style>
 </head>
 
 <body>
@@ -825,7 +832,7 @@
               <a href="https://link.springer.com/chapter/10.1007/978-3-031-64064-3_7">
 
                 <figure class="blog-banner-box">
-                  <img src="./assets/images/springer.png" alt="Design conferences in 2022" loading="lazy">
+                  <img data-src="./assets/images/springer.png" alt="Design conferences in 2022" class="lazy" loading="lazy">
                 </figure>
 
                 <div class="blog-content">
@@ -853,7 +860,7 @@
               <a href="https://dx.doi.org/10.21227/vxz9-ak04">
 
                 <figure class="blog-banner-box">
-                  <img src="./assets/images/ieee.png" alt="Design conferences in 2022" loading="lazy">
+                  <img data-src="./assets/images/ieee.png" alt="Design conferences in 2022" class="lazy" loading="lazy">
                 </figure>
 
                 <div class="blog-content">
