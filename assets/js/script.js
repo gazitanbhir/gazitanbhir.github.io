@@ -191,5 +191,47 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 
+document.addEventListener("DOMContentLoaded", function () {
+  const lazyImages = Array.from(document.querySelectorAll('img')); // Select all images
+  let currentIndex = 0; // To keep track of which image to load next
 
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+
+          // Load the image if it's the current one to load
+          if (lazyImages.indexOf(img) === currentIndex) {
+            // Save the original src and set a placeholder
+            const originalSrc = img.dataset.src; // Assume images have data-src attribute
+            img.src = originalSrc; // Load the actual image
+
+            // Move to the next image in the array
+            currentIndex++;
+          }
+
+          // Stop observing the image
+          observer.unobserve(img);
+        }
+      });
+    });
+
+    // Observe each image for visibility
+    lazyImages.forEach(img => {
+      // Use data-src if set; otherwise, directly load the src (fallback)
+      if (img.dataset.src) {
+        img.src = 'assets/images/ph.jpg'; // Set placeholder
+        observer.observe(img);
+      } else {
+        img.src = img.src; // Directly load if no placeholder needed
+      }
+    });
+  } else {
+    // Fallback for browsers that do not support IntersectionObserver
+    lazyImages.forEach(img => {
+      img.src = img.dataset.src || img.src; // Load the images directly
+    });
+  }
+});
 
