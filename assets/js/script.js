@@ -189,48 +189,70 @@ document.addEventListener("DOMContentLoaded", function() {
       modal.style.display = "none";
   };
 });
-document.addEventListener("DOMContentLoaded", function () {
-  const lazyImages = document.querySelectorAll('img'); // Select all images
-  const placeholderSrc = 'assets/images/ph.jpg'; // URL of a placeholder image
 
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
+
+
+
+document.addEventListener("DOMContentLoaded", function() {
+  let lazyImages = [].slice.call(document.querySelectorAll("img.lazy"));
+  let loading = false;
+
+  // Placeholder image URL
+  const placeholder = 'assets/images/ph.jpg';
+
+  function loadImages() {
+    if (loading) return;
+    loading = true;
+
+    // Process images one by one
+    const image = lazyImages.shift();
+    if (image) {
+      // Set the placeholder image
+      image.src = placeholder;
+
+      // Load the actual image
+      const actualImage = new Image();
+      actualImage.src = image.dataset.src;
+      actualImage.onload = () => {
+        image.src = actualImage.src; // Set the actual image src
+        image.classList.remove("lazy");
+        loading = false; // Reset loading state after image is loaded
+        loadImages(); // Load next image
+      };
+      actualImage.onerror = () => {
+        // Handle image load errors
+        loading = false;
+        loadImages(); // Continue to next image
+      };
+    }
+  }
+
+  // Create an Intersection Observer to observe when the images come into view
+  if ("IntersectionObserver" in window) {
+    let lazyImageObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
         if (entry.isIntersecting) {
-          const img = entry.target;
-
-          // Load the image by setting the src attribute
-          const originalSrc = img.dataset.src || img.src; // Use data-src if available
-          img.src = originalSrc; // Load the actual image
-
-          // Remove the placeholder
-          img.classList.remove('lazy');
-
-          // Unobserve the image after loading
-          observer.unobserve(img);
+          loadImages(); // Start loading images as they enter the viewport
+          lazyImageObserver.unobserve(entry.target); // Stop observing this image
         }
       });
     });
 
-    // Set all images with placeholders and observe them
-    lazyImages.forEach(img => {
-      // Set a placeholder image initially
-      img.src = placeholderSrc;
-      img.classList.add('lazy'); // Optionally add a class for styling
-
-      // Use data-src if available, otherwise use the current src
-      if (img.dataset.src) {
-        observer.observe(img);
-      }
+    lazyImages.forEach(function(lazyImage) {
+      lazyImageObserver.observe(lazyImage);
     });
   } else {
-    // Fallback for browsers that do not support IntersectionObserver
-    lazyImages.forEach(img => {
-      img.src = img.dataset.src || img.src; // Directly load images if no placeholder needed
+    // Fallback for older browsers
+    lazyImages.forEach(function(lazyImage) {
+      // Set the placeholder image initially
+      lazyImage.src = placeholder;
+      lazyImage.onload = () => {
+        lazyImage.src = lazyImage.dataset.src;
+        lazyImage.classList.remove("lazy");
+      };
     });
   }
 });
-
 
 
 
