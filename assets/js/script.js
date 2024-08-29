@@ -192,6 +192,46 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 document.addEventListener("DOMContentLoaded", function () {
+  const lazyImages = document.querySelectorAll('img');
+  const placeholderSrc = ''; // URL of the placeholder image
+
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          // Save the original src and set the placeholder
+          const originalSrc = img.src;
+          img.src = placeholderSrc; // Set to placeholder image
+
+          // Once the image is about to come into view, set the actual src
+          const loadImage = () => {
+            img.src = originalSrc;
+            img.removeEventListener('load', loadImage); // Cleanup after loading
+          };
+
+          img.addEventListener('load', loadImage);
+          observer.unobserve(img); // Optionally remove the observer if no longer needed
+        }
+      });
+    });
+
+    lazyImages.forEach(img => {
+      observer.observe(img);
+    });
+  } else {
+    // Fallback for browsers that do not support IntersectionObserver
+    lazyImages.forEach(img => {
+      img.src = img.src; // Just load all images
+    });
+  }
+});
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
   const lazyImages = Array.from(document.querySelectorAll('img')); // Select all images
   let currentIndex = 0; // To keep track of which image to load next
 
@@ -221,7 +261,7 @@ document.addEventListener("DOMContentLoaded", function () {
     lazyImages.forEach(img => {
       // Use data-src if set; otherwise, directly load the src (fallback)
       if (img.dataset.src) {
-        img.src = 'assets/images/ph.jpg'; // Set placeholder
+        img.src = 'path/to/placeholder-image.jpg'; // Set placeholder
         observer.observe(img);
       } else {
         img.src = img.src; // Directly load if no placeholder needed
